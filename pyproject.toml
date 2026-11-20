@@ -1,0 +1,31 @@
+[project]
+name = "yandex-mail"
+version = "0.1.0"
+description = "Read-only CLI for reading your own Yandex Mail over IMAP, designed for AI agents"
+requires-python = ">=3.11"
+dependencies = [
+    "filelock>=4.2.12",
+    "imapclient>=4.3.0",
+    "platformdirs>=4.14.7",
+]
+
+[project.scripts]
+yandex-mail = "yandex_mail.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.11,<2"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff.lint]
+# Default rules plus BLE (no blind 'except Exception'); the CLI boundary
+# in cli.py carries the one deliberate noqa.
+extend-select = ["BLE"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "ruff>=0.17.6",
+]

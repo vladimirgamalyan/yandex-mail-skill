@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.11", "3.14"]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      # v8 has no floating major tag (only exact v8.x.y tags exist).
+      - uses: astral-sh/setup-uv@v8.2.0
+        with:
+          enable-cache: true
+      - name: Install Python
+        run: uv python install ${{ matrix.python }}
+      - name: Run lint and tests
+        run: |
+          uv sync --locked --python ${{ matrix.python }}
+          uv run --python ${{ matrix.python }} ruff check
+          uv run --python ${{ matrix.python }} ruff format --check
+          uv run --python ${{ matrix.python }} pytest
+      # Users install straight from git, so the packaging and the entry
+      # point are part of the contract: build and run the tool the same
+      # way 'uvx --from git+<repo-url>' would.
+      - name: Smoke-test the packaged entry point
+        shell: bash
+        run: |
+          for command in "" check folders search read download sync; do
+            uvx --python ${{ matrix.python }} --from . yandex-mail $command --help > /dev/null
+          done
+      - name: Check without a credentials file exits with code 1
+        shell: bash
+        run: |
+          set +e
+          uvx --python ${{ matrix.python }} --from . yandex-mail check
+          code=$?
+          set -e
+          test "$code" -eq 1

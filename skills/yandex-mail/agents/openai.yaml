@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yandex Mail Reader"
+  short_description: "Read and search Yandex Mail (read-only) via yandex-mail"
+  default_prompt: "Use $yandex-mail to find and read letters in my Yandex Mail."
