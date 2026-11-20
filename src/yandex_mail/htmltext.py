@@ -16,6 +16,13 @@ _BLOCK = frozenset(
 )  # fmt: skip
 # Table cells keep their content apart on one line.
 _CELL = frozenset({"td", "th"})
+# Invisible characters that marketing mail pads its preview text with
+# (soft hyphen, combining grapheme joiner, zero-width space and non-joiner,
+# word joiner, braille blank, zero-width no-break space); a str.translate
+# table that deletes them. The zero-width joiner stays: emoji need it.
+INVISIBLE_FILLERS = dict.fromkeys(
+    (0x00AD, 0x034F, 0x200B, 0x200C, 0x2060, 0x2800, 0xFEFF)
+)
 
 
 class _TextExtractor(HTMLParser):
@@ -65,6 +72,7 @@ def html_to_text(html: str) -> str:
     parser.close()
     lines = []
     for line in "".join(parser.chunks).split("\n"):
+        line = line.translate(INVISIBLE_FILLERS)
         # Non-breaking spaces (&nbsp;) become plain spaces.
         line = re.sub(r"[ \t]+", " ", line.replace("\u00a0", " ")).strip()
         if line or (lines and lines[-1]):

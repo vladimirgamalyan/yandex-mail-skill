@@ -127,7 +127,10 @@ UIDVALIDITY to detect renumbering). The JSON schema of a message:
 - `text` — the text/plain parts; if they are missing or blank, the visible
   text of the text/html parts (scripts, styles and the head dropped, one
   block element per line). A text/plain part that holds an HTML document
-  (Mosenergosbyt and MosOblEIRC send those) is converted the same way. `search` gives `snippet` (first 200 characters,
+  (Mosenergosbyt and MosOblEIRC send those) is converted the same way.
+  Invisible characters that marketing mail pads its preview text with
+  (zero-width spaces and non-joiners, braille blanks, soft hyphens) are
+  dropped. `search` gives `snippet` (first 200 characters,
   whitespace collapsed) instead.
 - `attachments` — every leaf part that is not body text, numbered from 1
   in message order. An attached email (message/rfc822) is one attachment.

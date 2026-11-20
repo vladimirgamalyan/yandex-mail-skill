@@ -17,7 +17,7 @@ from email import policy
 from email.message import Message
 from email.utils import getaddresses, parsedate_to_datetime
 
-from .htmltext import html_to_text
+from .htmltext import INVISIBLE_FILLERS, html_to_text
 
 SNIPPET_CHARS = 200
 
@@ -295,7 +295,10 @@ def body_text(msg: Message) -> str | None:
     """text/plain body parts; if they are missing or blank, the HTML ones."""
     bodies = [part for part in _leaves(msg) if _is_body(part)]
     plain = [_part_text(p) for p in bodies if p.get_content_type() == "text/plain"]
-    plain = [html_to_text(t) if _HTML_DOCUMENT.match(t) else t for t in plain]
+    plain = [
+        html_to_text(t) if _HTML_DOCUMENT.match(t) else t.translate(INVISIBLE_FILLERS)
+        for t in plain
+    ]
     text = "\n\n".join(t.strip() for t in plain if t.strip())
     if not text:
         html = [_part_text(p) for p in bodies if p.get_content_type() == "text/html"]

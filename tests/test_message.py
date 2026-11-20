@@ -107,6 +107,15 @@ def test_html_document_in_plain_part_becomes_text():
         assert body_text(parse(message)) == "Счёт за октябрь"
 
 
+def test_preview_padding_characters_are_dropped():
+    # Marketing mail pads the preview text with invisible characters.
+    html = "<p>Мои&#774; счёт&zwnj;&nbsp;&#847;&#10240;&#10240;&shy;&#8203; оплачен</p>"
+    decomposed_short_i = "и" + chr(0x0306)  # a real letter, kept
+    assert html_to_text(html) == f"Мо{decomposed_short_i} счёт оплачен"
+    plain = "Счёт" + chr(0x2800) * 3 + chr(0x200C) + " готов"
+    assert body_text(parse(make_raw(body=plain))) == "Счёт готов"
+
+
 def test_plain_text_mentioning_html_stays_as_is():
     message = make_raw(body="Пришлите <html> страницу", html="<p>другое</p>")
     assert body_text(parse(message)) == "Пришлите <html> страницу"
