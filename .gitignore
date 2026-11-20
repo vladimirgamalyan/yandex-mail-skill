@@ -42,3 +42,7 @@ claude.lnk
 
 # Never commit mailbox credentials
 credentials.json
+
+# Local yandex-mail data (credentials, mail archive): %APPDATA%\yandex-mail
+# may be a junction to this folder on an encrypted drive.
+/data/

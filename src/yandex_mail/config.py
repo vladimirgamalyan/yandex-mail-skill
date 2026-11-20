@@ -36,9 +36,37 @@ class Credentials:
     password: str = field(repr=False)
 
 
+class DataUnavailableError(PermanentError):
+    """The config directory links to a place that is not there (exit code 1)."""
+
+
 def config_dir() -> Path:
-    """Per-user configuration directory (independent of the working directory)."""
-    return Path(user_config_dir(APP_NAME, appauthor=False, roaming=True))
+    """Per-user configuration directory (independent of the working directory).
+
+    It may be a link (a symlink or a Windows junction) to another drive, such
+    as an encrypted volume. While that drive is not mounted, every command
+    stops here, instead of reporting the credentials file or the archive as
+    missing and inviting someone to create them anew.
+    """
+    path = Path(user_config_dir(APP_NAME, appauthor=False, roaming=True))
+    if os.path.lexists(path) and not path.exists():
+        raise DataUnavailableError(
+            f"The yandex-mail folder {path} links to {_link_target(path)}, which "
+            "is not available: is the drive that holds it mounted (an encrypted "
+            "volume, for example)? Ask the mailbox owner to make it available "
+            "and run the command again. Do not create the credentials file or "
+            "the archive anew."
+        )
+    return path
+
+
+def _link_target(path: Path) -> str:
+    try:
+        target = os.readlink(path)
+    except OSError:
+        return "another location"
+    # Windows reports a junction's target with the \\?\ prefix.
+    return target.removeprefix("\\\\?\\")
 
 
 def credentials_path() -> Path:

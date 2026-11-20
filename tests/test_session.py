@@ -2,12 +2,13 @@
 
 import json
 import logging
+import os
 
 import pytest
 from conftest import FakeFolder, FakeIMAP
 from imapclient.exceptions import IMAPClientAbortError, IMAPClientError
 
-from yandex_mail import session, throttle
+from yandex_mail import config, session, throttle
 from yandex_mail.cli import main
 from yandex_mail.config import CredentialsError
 from yandex_mail.session import AuthError, limit_pause, mailbox_session, server_text
@@ -64,6 +65,35 @@ def test_credentials_with_bom_and_damage(config_dir):
     with pytest.raises(CredentialsError) as excinfo:
         load_credentials()
     assert "pass-123" not in str(excinfo.value)
+
+
+def _link_dir(link, target):
+    """A directory symlink, or a junction where symlinks need privileges."""
+    try:
+        os.symlink(target, link, target_is_directory=True)
+    except OSError:
+        if os.name != "nt":
+            raise
+        import _winapi
+
+        _winapi.CreateJunction(str(target), str(link))
+
+
+def test_unmounted_data_drive_is_reported_as_such(tmp_path, monkeypatch, capsys):
+    # The config directory may be a junction to an encrypted drive.
+    target = tmp_path / "encrypted" / "yandex-mail"
+    target.mkdir(parents=True)
+    link = tmp_path / "yandex-mail"
+    _link_dir(link, target)
+    monkeypatch.setattr(config, "user_config_dir", lambda *args, **kwargs: str(link))
+    assert config.config_dir() == link
+
+    target.rmdir()  # the drive is dismounted
+    with pytest.raises(config.DataUnavailableError, match="not available") as excinfo:
+        config.config_dir()
+    assert str(target) in str(excinfo.value)
+    assert main(["check"]) == 1
+    assert "is the drive that holds it mounted" in capsys.readouterr().err
 
 
 def test_rejected_login_is_permanent_and_explained(server, capsys):

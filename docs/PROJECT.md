@@ -69,6 +69,11 @@ Contents:
 - `yandex_mail.lock` — the inter-process lock file.
 - `archive/` — the local archive kept by `sync`.
 
+The directory may be a symlink or a Windows junction to another drive,
+such as an encrypted volume. While its target is missing (the drive is
+not mounted), every command exits with 1 and says so, rather than
+reporting the credentials file or the archive as missing.
+
 The password is never printed or logged: error messages name the file and
 its format, never its content; the `Credentials` object keeps the password
 out of its repr; imapclient's DEBUG loggers (which would log the LOGIN

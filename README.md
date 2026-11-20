@@ -54,6 +54,12 @@ again: installed skill copies do not update on their own.
 The password is never printed or logged. Agents are told not to create
 the file or ask for the password.
 
+To keep the password and the mail archive on an encrypted drive, move the
+whole `yandex-mail` config directory there and leave a link in its place
+(on Windows a junction, which needs no administrator rights):
+`New-Item -ItemType Junction -Path $env:APPDATA\yandex-mail -Target <folder>`.
+While the drive is not mounted, every command exits with code 1 and says so.
+
 ## Commands
 
 - `yandex-mail check` — log in and show which mailbox is read
