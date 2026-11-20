@@ -234,8 +234,8 @@ Print one message in full as JSON: headers, the text and the attachment
 list. With --thread, print its whole conversation instead.
 
 FOLDER and UID come from the 'search' output ('folder', 'uid'). The text is
-the text/plain body; for HTML-only letters it is the visible text of the
-HTML. Encodings (RFC 2047 headers, koi8-r, windows-1251, ...) are decoded.
+the text/plain body; for HTML-only letters, and for letters whose plain
+part holds HTML source, it is the visible text of the HTML. Encodings (RFC 2047 headers, koi8-r, windows-1251, ...) are decoded.
 
 --thread finds the other messages of the conversation in all searched
 folders (sent mail included): linked by the References and In-Reply-To

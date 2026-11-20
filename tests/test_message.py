@@ -93,6 +93,25 @@ def test_html_only_body_becomes_text():
     assert body_text(parse(message)) == "Сумма к оплате:\n\nИтого 1 234,56"
 
 
+def test_html_document_in_plain_part_becomes_text():
+    # Mosenergosbyt and MosOblEIRC put the HTML source into text/plain too.
+    for start in (
+        '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">\r\n<html>',
+        "\r\n<html>",
+    ):
+        page = (
+            start
+            + "<head><title>T</title></head><body><p>Счёт&nbsp;за октябрь</p></body></html>"
+        )
+        message = make_raw(body=page, html=page)
+        assert body_text(parse(message)) == "Счёт за октябрь"
+
+
+def test_plain_text_mentioning_html_stays_as_is():
+    message = make_raw(body="Пришлите <html> страницу", html="<p>другое</p>")
+    assert body_text(parse(message)) == "Пришлите <html> страницу"
+
+
 def test_blank_plain_part_falls_back_to_html():
     message = make_raw(body="   \n", html="<p>Настоящий текст</p>")
     assert body_text(parse(message)) == "Настоящий текст"

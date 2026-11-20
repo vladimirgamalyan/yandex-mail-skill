@@ -37,6 +37,9 @@ _UNKNOWN_CHARSETS = frozenset(
 _ENCODED_WORD = re.compile(r"=\?([^?\s]+)\?([bBqQ])\?(.*?)\?=")
 _MESSAGE_ID = re.compile(r"<[^<>\s]+>")
 _HEADER_END = re.compile(rb"\r?\n\r?\n")
+# Some senders (Mosenergosbyt, MosOblEIRC) put the HTML source into the
+# text/plain part as well.
+_HTML_DOCUMENT = re.compile(r"\A[\s﻿]*<(?:!doctype\s+html|html)[\s>]", re.IGNORECASE)
 
 
 def parse(raw: bytes) -> Message:
@@ -292,6 +295,7 @@ def body_text(msg: Message) -> str | None:
     """text/plain body parts; if they are missing or blank, the HTML ones."""
     bodies = [part for part in _leaves(msg) if _is_body(part)]
     plain = [_part_text(p) for p in bodies if p.get_content_type() == "text/plain"]
+    plain = [html_to_text(t) if _HTML_DOCUMENT.match(t) else t for t in plain]
     text = "\n\n".join(t.strip() for t in plain if t.strip())
     if not text:
         html = [_part_text(p) for p in bodies if p.get_content_type() == "text/html"]
