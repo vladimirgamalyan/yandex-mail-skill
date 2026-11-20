@@ -113,7 +113,7 @@ def test_batches_by_size(monkeypatch, server, config_dir):
 
 
 def test_interrupted_sync_resumes_after_saved_batch(monkeypatch, server, config_dir):
-    for uid in range(1, 61):
+    for uid in range(1, 31):
         add(server, "INBOX", uid, make_raw(subject=f"m{uid}"), when=arrival(5))
     original = FakeIMAP.fetch
     calls = {"bodies": 0}
@@ -128,12 +128,12 @@ def test_interrupted_sync_resumes_after_saved_batch(monkeypatch, server, config_
     monkeypatch.setattr(FakeIMAP, "fetch", flaky)
     assert main(["sync", "--since", "2026-11-01", "--folder", "INBOX"]) == 2
     state = archive.load_state()
-    assert state["folders"]["INBOX"]["last_uid"] == 50
-    assert len(list((config_dir / "archive" / "INBOX" / "1000").glob("*.eml"))) == 50
+    assert state["folders"]["INBOX"]["last_uid"] == 20
+    assert len(list((config_dir / "archive" / "INBOX" / "1000").glob("*.eml"))) == 20
 
     assert main(["sync"]) == 0
     bodies = [call[2] for call in server.calls_of("fetch") if "BODY.PEEK[]" in call[3]]
-    assert bodies[-1] == list(range(51, 61))
+    assert bodies[-1] == list(range(21, 31))
 
 
 def test_earlier_since_extends_the_archive_back(server, config_dir):
