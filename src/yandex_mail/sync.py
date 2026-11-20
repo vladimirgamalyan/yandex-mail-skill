@@ -11,9 +11,11 @@ from .mailbox import ReadOnlyMailbox
 
 # A FETCH batch holds up to this many messages and, beyond its first
 # message, up to this many bytes; batches are this many seconds apart.
-BATCH_MESSAGES = 50
-BATCH_BYTES = 20 * 1024 * 1024
-BATCH_PAUSE = 1.0
+# Yandex drops the connection ("BYE problems with connection") during
+# large FETCH responses, so the batches are small (ADR-0010).
+BATCH_MESSAGES = 20
+BATCH_BYTES = 5 * 1024 * 1024
+BATCH_PAUSE = 2.0
 
 
 class SyncError(PermanentError):

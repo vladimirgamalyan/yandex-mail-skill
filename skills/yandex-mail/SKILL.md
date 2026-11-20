@@ -64,7 +64,9 @@ numbers) exactly.
 
 - Exit code 2 (`retry after Ns`): another run holds the mailbox, Yandex
   asked to slow down, or the network is down. Wait the given time before
-  one retry; do not loop. Mention it if the wait is long.
+  one retry; do not loop. Mention it if the wait is long. Exception:
+  `sync` keeps what it fetched and Yandex sometimes drops the connection
+  during a long sync, so rerun `sync` after each wait until it exits 0.
 - Exit code 1: a permanent error; do not retry the same command.
   - **"No credentials file"** or **"Yandex rejected the login"**: the
     setup is the mailbox owner's job. Relay the message: where the file

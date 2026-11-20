@@ -93,12 +93,12 @@ def test_uidvalidity_change_starts_new_generation(server, config_dir):
 
 
 def test_batches_by_count(server, config_dir):
-    for uid in range(1, 121):
+    for uid in range(1, 51):
         add(server, "INBOX", uid, make_raw(subject=f"m{uid}"), when=arrival(5))
     run_sync(box(server), date(2026, 11, 1), ["INBOX"])
     batches = [call[2] for call in server.calls_of("fetch") if "BODY.PEEK[]" in call[3]]
-    assert [len(batch) for batch in batches] == [50, 50, 20]
-    assert batches[0] == list(range(1, 51))
+    assert [len(batch) for batch in batches] == [20, 20, 10]
+    assert batches[0] == list(range(1, 21))
 
 
 def test_batches_by_size(monkeypatch, server, config_dir):

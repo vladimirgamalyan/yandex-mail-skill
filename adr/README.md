@@ -57,3 +57,5 @@ record, or anything already fully explained by `docs/PROJECT.md`.
   answers and persist conservative pauses
 - [0009](0009-default-folder-sets-by-role.md) — Default folder sets chosen by
   SPECIAL-USE role
+- [0010](0010-small-sync-batches.md) — Small sync batches: Yandex drops the
+  connection on large FETCH responses

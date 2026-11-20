@@ -249,8 +249,9 @@ archive/
   archived again from its start date into a new one.
 - An earlier `--since` extends the archive back (`SINCE new BEFORE old`
   per folder); a later one is ignored.
-- Messages are fetched in batches of consecutive UIDs (up to 50 messages
-  and 20 MB of RFC822.SIZE per FETCH, about a second apart). `state.json`
+- Messages are fetched in batches of consecutive UIDs (up to 20 messages
+  and 5 MB of RFC822.SIZE per FETCH, two seconds apart: Yandex drops the
+  connection on large FETCH responses, ADR-0010). `state.json`
   is saved after every batch, so an interrupted sync resumes after the last
   saved message.
 - A folder first seen later (created or renamed on the server) starts

@@ -336,8 +336,9 @@ The first sync needs --since and archives every message that arrived on or
 after that date. Later syncs fetch only messages newer than the last
 archived one per folder; a folder without new mail costs one STATUS
 request. A later, earlier --since extends the archive back to that date;
-a later --since is ignored. Messages are fetched in batches of up to 50,
-and an interrupted sync keeps what it fetched and resumes after it.
+a later --since is ignored. Messages are fetched in small batches (up to
+20 messages or 5 MB, two seconds apart), and an interrupted sync keeps
+what it fetched and resumes after it.
 
 By default all folders except spam, trash, drafts and virtual folders are
 archived (see 'yandex-mail folders', field archived_by_default); --folder
@@ -370,10 +371,12 @@ output schema (single JSON object on stdout):
     )
     + """
   Messages fetched before a failure are kept; the retry continues after them.
+  Yandex sometimes drops the connection during a long sync: run it again
+  after the pause, as many times as needed, until it exits with 0.
 
 server load (automatic):
   One connection per run, one STATUS per folder, then one SEARCH and FETCH
-  batches only where there is new mail, about a second apart. The run holds
+  batches only where there is new mail, two seconds apart. The run holds
   the inter-process lock throughout, so a long first sync makes other
   yandex-mail runs wait and fail with exit code 2: start with a recent
   --since and extend it later if needed.
